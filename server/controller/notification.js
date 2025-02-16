@@ -23,7 +23,8 @@ class NotificationController {
 
     static handleEmailNotification = (req, res) => {
         try {
-            NotificationService.handleEmailNotification();
+            const { data } = req.body;
+            NotificationService.handleEmailNotification(data?.content);
         } catch (error) {
             console.log("Failed to handle email notification", error);
         }
@@ -31,7 +32,8 @@ class NotificationController {
 
     static handleSmsNotification = (req, res) => {
         try {
-            NotificationService.handleSmsNotification();
+            const { data } = req.body;
+            NotificationService.handleSmsNotification(data?.content);
         } catch (error) {
             console.log("Failed to handle sms notification", error);
         }

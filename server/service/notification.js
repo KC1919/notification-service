@@ -7,7 +7,7 @@ class NotificationService {
                 await fetch('http://localhost:3000/api/v1/notify/email', {
                     method: "POST",
                     headers: {
-                        "ContentType": "application/json"
+                        "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
                         data: {
@@ -20,7 +20,7 @@ class NotificationService {
                 await fetch('http://localhost:3000/api/v1/notify/sms', {
                     method: "POST",
                     headers: {
-                        "ContentType": "application/json"
+                        "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
                         data: {
@@ -33,18 +33,17 @@ class NotificationService {
             throw new Error('Failed to handle notification.')
         }
     }
-    static handleEmailNotification = async () => {
+    static handleEmailNotification = async (emailData) => {
         try {
-            console.log("Hello from email notification!");
-
+            console.log(emailData);
         } catch (error) {
             throw new Error('Failed to handle email notification.')
         }
     }
 
-    static handleSmsNotification = async () => {
+    static handleSmsNotification = async (smsData) => {
         try {
-            console.log("Hello from sms notification!");
+            console.log(smsData);
         } catch (error) {
             throw new Error('Failed to handle sms notification.')
         }
