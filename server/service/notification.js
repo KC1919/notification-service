@@ -12,8 +12,9 @@ class NotificationService {
             if (channel === 'email') {
 
                 this.emailQueue.push({
-                    data: {
-                        content: "Hello from email."
+                    content: {
+                        subject: 'Test Email',
+                        body: 'Testing Email Service...'
                     }
                 });
 
@@ -69,15 +70,13 @@ class NotificationService {
     handleEmailEvent = async (emailData) => {
         try {
 
-            await fetch(`http://localhost:3001/email`, {
+            await fetch(`http://localhost:3001/api/v1/email/send`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    data: {
-                        content: emailData
-                    }
+                    'data': emailData
                 })
             });
         } catch (error) {
@@ -125,9 +124,9 @@ class NotificationService {
                     console.log('Email queue is already in process!!');
                 }
             }
-            else{
+            else {
                 console.log('Nothing to process, emailQueue empty!');
-                
+
             }
         } catch (error) {
             console.log('Failed to check email queue', error);
