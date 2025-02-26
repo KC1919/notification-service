@@ -47,7 +47,9 @@ class NotificationService {
                     },
                     body: JSON.stringify({
                         data: {
-                            content: "Hello from sms."
+                            content: {
+                                message: "Testing Twilio SMS"
+                            }
                         }
                     })
                 })
@@ -86,7 +88,15 @@ class NotificationService {
 
     handleSmsNotification = async (smsData) => {
         try {
-            console.log(smsData);
+            await fetch(`http://localhost:3002/api/v1/sms/send`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    'data': smsData
+                })
+            });
             return;
         } catch (error) {
             console.log(error);
