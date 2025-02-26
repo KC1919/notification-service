@@ -1,14 +1,16 @@
 import NotificationService from '../service/notification.js';
 
+const NotiService = new NotificationService();
+
 class NotificationController {
     constructor(parameters) { }
 
     static handleNotification = async (req, res) => {
         try {
             const { channel } = req.params;
-            NotificationService.handleNotification(channel);
+            await NotiService.handleNotification(channel);
             res.status(200).json({
-                message: 'Email notification sent',
+                message: 'Notification sent',
                 status: 'success',
                 success: true
             });
@@ -22,12 +24,12 @@ class NotificationController {
         }
     }
 
-    static handleEmailNotification = (req, res) => {
+    static handleEmailNotification = async (req, res) => {
         try {
             const { data } = req.body;
-            NotificationService.handleEmailNotification(data?.content);
+            await NotiService.handleEmailNotification(data?.content);
             res.status(200).json({
-                message: 'SMS notification sent',
+                message: 'Email notification sent',
                 status: 'success',
                 success: true
             });
@@ -36,10 +38,15 @@ class NotificationController {
         }
     }
 
-    static handleSmsNotification = (req, res) => {
+    static handleSmsNotification = async (req, res) => {
         try {
             const { data } = req.body;
-            NotificationService.handleSmsNotification(data?.content);
+            await NotiService.handleSmsNotification(data?.content);
+            res.status(200).json({
+                message: 'SMS notification sent',
+                status: 'success',
+                success: true
+            });
         } catch (error) {
             console.log("Failed to handle sms notification", error);
         }
