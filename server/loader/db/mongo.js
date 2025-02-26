@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
-import { config } from '../../config/index.js';
+// import { config } from '../../config/index.js';
 
-export const connectDb = async () => {
+export const connectDb = async (url) => {
     try {
-        const conn = await mongoose.connect(config.mongodb.url);
+        const conn = await mongoose.connect(url);
 
         if (conn) {
             console.log('Database connected!');

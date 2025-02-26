@@ -4,7 +4,7 @@ import { connectDb } from './loader/db/mongo.js';
 const startServer = async () => {
     try {
         // connect to mongodb
-        app.mongodb = await connectDb();
+        app.mongodb = await connectDb(app.config.mongodb.url);
 
         // start express server
         app.listen(process.env.SERVER_PORT || 3000, () => {

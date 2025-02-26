@@ -13,5 +13,8 @@ export const config = {
     },
     jwt: {
         'secret': process.env.JWT_SECRET_KEY
+    },
+    server: {
+        'url': `${process.env.SERVER_HOST}:${process.env.SERVER_PORT}`
     }
 }

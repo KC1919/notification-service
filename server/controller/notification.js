@@ -1,4 +1,3 @@
-import app from '../app.js'
 import NotificationService from '../service/notification.js';
 
 class NotificationController {
@@ -6,11 +5,13 @@ class NotificationController {
 
     static handleNotification = async (req, res) => {
         try {
-            // console.log(app.mongodb);
-
             const { channel } = req.params;
             NotificationService.handleNotification(channel);
-
+            res.status(200).json({
+                message: 'Email notification sent',
+                status: 'success',
+                success: true
+            });
         } catch (error) {
             res.status(500).json({
                 message: 'Failed to handle notification',
@@ -25,6 +26,11 @@ class NotificationController {
         try {
             const { data } = req.body;
             NotificationService.handleEmailNotification(data?.content);
+            res.status(200).json({
+                message: 'SMS notification sent',
+                status: 'success',
+                success: true
+            });
         } catch (error) {
             console.log("Failed to handle email notification", error);
         }
