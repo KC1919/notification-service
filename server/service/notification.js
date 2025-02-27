@@ -17,9 +17,9 @@ class NotificationService {
         }
     }
 
-    handleSmsNotification = async (message) => {
+    handleSmsNotification = async ({ message, mobile }) => {
         try {
-            const response = await SMS.handleSMSEvent(message);
+            const response = await SMS.handleSMSEvent({message, mobile});
             return;
         } catch (error) {
             console.log(error);

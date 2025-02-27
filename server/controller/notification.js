@@ -21,8 +21,8 @@ class NotificationController {
 
     static handleSmsNotification = async (req, res) => {
         try {
-            const { message } = req.body;
-            const response = await NotiService.handleSmsNotification(message);
+            const { message, mobile } = req.body;
+            const response = await NotiService.handleSmsNotification({message, mobile});
             res.status(200).json({
                 message: 'SMS notification sent',
                 status: 'success',

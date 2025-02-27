@@ -7,11 +7,12 @@ class SMSService {
         this.startProcessing();
     }
 
-    handleSMSEvent = async (message) => {
+    handleSMSEvent = async ({ message, mobile }) => {
         try {
             this.smsQueue.push({
                 content: {
-                    'message': message
+                    'message': message,
+                    'mobile': mobile
                 }
             });
 
