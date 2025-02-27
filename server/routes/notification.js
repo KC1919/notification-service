@@ -4,7 +4,6 @@ const router = express.Router();
 
 
 router
-    .get('/:channel', NotificationController.handleNotification)
     .post('/email', NotificationController.handleEmailNotification)
     .post('/sms', NotificationController.handleSmsNotification)
 
