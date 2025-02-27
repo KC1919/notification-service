@@ -118,6 +118,7 @@ class SMSService {
                     this.smsQueue.reverse();
 
                     let counter = eventsToProcess - smsQueueCopy.length;
+                    let copyCounter = counter;
 
                     while (counter > 0) {
                         this.smsQueue.pop();
@@ -126,7 +127,7 @@ class SMSService {
 
                     this.smsQueue.reverse();
 
-                    console.log('SMS Events processed:', eventsToProcess);
+                    console.log('SMS Events processed:', copyCounter);
                 }
             }
 
