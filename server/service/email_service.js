@@ -3,6 +3,7 @@ class EmailService {
     constructor() {
         this.emailQueue = [];
         this.isProcessing = false;
+        this.isEmailServiceHealthy = false;
         this.startProcessing();
     }
 
@@ -24,7 +25,7 @@ class EmailService {
     sendEmailNotification = async (emailData) => {
         try {
 
-            await fetch(`http://localhost:${process.env.EMAIL_SERVICE_PORT}/api/v1/email/send`, {
+            const response = await fetch(`http://localhost:${process.env.EMAIL_SERVICE_PORT}/api/v1/email/send`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -33,28 +34,38 @@ class EmailService {
                     'data': emailData
                 })
             });
+
+            if (response.status === 200) {
+                return true;
+            }
+            else {
+                return false;
+            }
         } catch (error) {
-            throw new Error('Failed to handle email notification.')
+            console.log('Failed to handle email notification.')
+            return false;
         }
     }
 
     checkEmailServiceHealth = async () => {
         try {
-            const response = await fetch('http://localhost:3001/health', {
+            const response = await fetch(`http://localhost:${process.env.EMAIL_SERVICE_PORT}/health`, {
                 method: 'GET'
             });
 
             if (response.status === 200) {
                 const jsonResp = await response.json();
                 console.log(jsonResp);
+                return true;
             }
             else {
                 console.log('Email Service is down!!');
-
+                return false;
             }
         } catch (error) {
-            console.log('Failed to check email service health', error);
+            // console.log('Failed to check email service health', error);
             console.log('Email Service is down!!');
+            return false;
         }
     }
 
@@ -64,7 +75,7 @@ class EmailService {
                 if (this.isProcessing === false) {
                     await this.processEmailQueue();
                 }
-                else {
+                else if (this.isProcessing && this.isEmailServiceHealthy) {
                     console.log('Email queue is already in process!!');
                 }
             }
@@ -79,23 +90,58 @@ class EmailService {
 
     processEmailQueue = async () => {
         try {
-            this.isProcessing = true;
+            console.log("Email health:", this.isEmailServiceHealthy);
 
-            const emailQueueCopy = [...this.emailQueue];
-            this.emailQueue = [];
+            // if the email service up and running (healthy)
+            if (this.isEmailServiceHealthy) {
 
-            emailQueueCopy.reverse();
+                const emailQueueCopy = [...this.emailQueue];
 
-            const eventsToProcess = emailQueueCopy.length;
+                emailQueueCopy.reverse();
 
-            while (emailQueueCopy.length > 0) {
-                const data = emailQueueCopy.pop();
-                await this.sendEmailNotification(data);
+                const eventsToProcess = emailQueueCopy.length;
+
+                this.isProcessing = true;
+
+                while (emailQueueCopy.length > 0 && this.isEmailServiceHealthy) {
+                    const data = emailQueueCopy[emailQueueCopy.length - 1];
+                    const result = await this.sendEmailNotification(data);
+                    if (result === false) break;
+
+                    emailQueueCopy.pop();
+                    console.log("Popped");
+                }
+
+                if (this.isEmailServiceHealthy === false) {
+                    this.isProcessing = false;
+                }
+
+                if (emailQueueCopy.length < eventsToProcess || emailQueueCopy.length == 0) {
+                    this.isProcessing = false;
+
+                    this.emailQueue.reverse();
+
+                    let counter = eventsToProcess - emailQueueCopy.length;
+                    let copyCounter = counter;
+                    console.log("IN there to clean");
+
+
+                    while (counter > 0) {
+                        console.log("Popped from original queue");
+
+                        this.emailQueue.pop();
+                        counter--;
+                    }
+
+                    this.emailQueue.reverse();
+
+                    console.log('Email Events processed:', copyCounter);
+                }
             }
 
-            this.isProcessing = false;
-
-            console.log('Email Events processed:', eventsToProcess);
+            else if (this.isEmailServiceHealthy === false) {
+                this.isProcessing = false;
+            }
 
         } catch (error) {
             console.log('Failed to process email queue', error);
@@ -105,6 +151,8 @@ class EmailService {
     startProcessing = async () => {
         try {
             setInterval(async () => {
+                const result = await this.checkEmailServiceHealth();
+                this.isEmailServiceHealthy = result;
                 await this.checkEmailQueue();
             }, 0.5 * 60 * 1000);
         } catch (error) {

@@ -3,6 +3,7 @@ class SMSService {
     constructor() {
         this.smsQueue = [];
         this.isProcessing = false;
+        this.isSMSServiceHealthy = false;
         this.startProcessing();
     }
 
@@ -23,7 +24,7 @@ class SMSService {
     sendSMSNotification = async (smsData) => {
         try {
 
-            await fetch(`http://localhost:${process.env.SMS_SERVICE_PORT}/api/v1/sms/send`, {
+            const response = await fetch(`http://localhost:${process.env.SMS_SERVICE_PORT}/api/v1/sms/send`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -32,28 +33,38 @@ class SMSService {
                     'data': smsData
                 })
             });
+
+            if (response.status === 200) {
+                return true;
+            }
+            else {
+                return false;
+            }
         } catch (error) {
-            throw new Error('Failed to handle sms notification.')
+            console.log('Failed to handle sms notification.');
+            return false;
         }
     }
 
     checkSMSServiceHealth = async () => {
         try {
-            const response = await fetch('http://localhost:3001/health', {
+            const response = await fetch(`http://localhost:${process.env.SMS_SERVICE_PORT}/health`, {
                 method: 'GET'
             });
 
             if (response.status === 200) {
                 const jsonResp = await response.json();
                 console.log(jsonResp);
+                return true;
             }
             else {
-                console.log('sms Service is down!!');
-
+                console.log('SMS Service is down!!');
+                return false;
             }
         } catch (error) {
-            console.log('Failed to check sms service health', error);
+            // console.log('Failed to check sms service health', error);
             console.log('sms Service is down!!');
+            return false;
         }
     }
 
@@ -64,7 +75,7 @@ class SMSService {
                     await this.processSMSQueue();
                 }
                 else {
-                    console.log('sms queue is already in process!!');
+                    console.log('SMS queue is already in process!!');
                 }
             }
             else {
@@ -78,23 +89,50 @@ class SMSService {
 
     processSMSQueue = async () => {
         try {
-            this.isProcessing = true;
+            // if SMS service is up and running (healthy)
+            if (this.isSMSServiceHealthy) {
 
-            const smsQueueCopy = [...this.smsQueue];
-            this.smsQueue = [];
+                const smsQueueCopy = [...this.smsQueue];
+                this.smsQueue = [];
 
-            smsQueueCopy.reverse();
+                smsQueueCopy.reverse();
 
-            const eventsToProcess = smsQueueCopy.length;
+                let eventsToProcess = smsQueueCopy.length;
 
-            while (smsQueueCopy.length > 0) {
-                const data = smsQueueCopy.pop();
-                await this.sendSMSNotification(data);
+                this.isProcessing = true;
+
+                while (smsQueueCopy.length > 0 && this.isSMSServiceHealthy) {
+                    const data = smsQueueCopy[smsQueueCopy.length - 1];;
+                    const result = await this.sendSMSNotification(data);
+                    if (result === false) break;
+                    smsQueueCopy.pop();
+                }
+
+                if (this.isSMSServiceHealthy === false) {
+                    this.isProcessing = false;
+                }
+
+                if (smsQueueCopy.length < eventsToProcess || smsQueueCopy.length == 0) {
+                    this.isProcessing = false;
+
+                    this.smsQueue.reverse();
+
+                    let counter = eventsToProcess - smsQueueCopy.length;
+
+                    while (counter > 0) {
+                        this.smsQueue.pop();
+                        counter--;
+                    }
+
+                    this.smsQueue.reverse();
+
+                    console.log('SMS Events processed:', eventsToProcess);
+                }
             }
 
-            this.isProcessing = false;
-
-            console.log('SMS Events processed:', eventsToProcess);
+            else if (this.isSMSServiceHealthy === false) {
+                this.isProcessing = false;
+            }
 
         } catch (error) {
             console.log('Failed to process sms queue', error);
@@ -104,6 +142,8 @@ class SMSService {
     startProcessing = async () => {
         try {
             setInterval(async () => {
+                const result = await this.checkSMSServiceHealth();
+                this.isSMSServiceHealthy = result;
                 await this.checkSMSQueue();
             }, 0.5 * 60 * 1000);
         } catch (error) {
