@@ -1,4 +1,3 @@
-import app from '../app.js';
 import EmailService from './email_service.js';
 import SMSService from './sms_service.js';
 
@@ -7,21 +6,6 @@ const SMS = new SMSService();
 
 class NotificationService {
     constructor(parameters) {
-    }
-
-    handleNotification = async (channel) => {
-        try {
-            if (channel === 'email') {
-                this.handleEmailNotification();
-            }
-
-            else if (channel === 'sms') {
-                this.handleSmsNotification();
-            }
-        } catch (error) {
-            console.log(error);
-            throw new Error('Failed to handle notification.')
-        }
     }
 
     handleEmailNotification = async ({ subject, body }) => {

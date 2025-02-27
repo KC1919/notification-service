@@ -15,7 +15,7 @@ class EmailService {
                 }
             });
 
-            console.log('Messages in Queue:', this.emailQueue.length);
+            console.log('Messages in Email Queue:', this.emailQueue.length);
         } catch (error) {
             console.log('Error while handling email event:', error);
         }
@@ -24,7 +24,7 @@ class EmailService {
     sendEmailNotification = async (emailData) => {
         try {
 
-            await fetch(`http://localhost:3001/api/v1/email/send`, {
+            await fetch(`http://localhost:${process.env.EMAIL_SERVICE_PORT}/api/v1/email/send`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -95,7 +95,7 @@ class EmailService {
 
             this.isProcessing = false;
 
-            console.log('Events processed:', eventsToProcess);
+            console.log('Email Events processed:', eventsToProcess);
 
         } catch (error) {
             console.log('Failed to process email queue', error);

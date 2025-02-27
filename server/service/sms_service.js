@@ -14,7 +14,7 @@ class SMSService {
                 }
             });
 
-            console.log('Messages in Queue:', this.smsQueue.length);
+            console.log('Messages in SMS Queue:', this.smsQueue.length);
         } catch (error) {
             console.log('Error while handling sms event:', error);
         }
@@ -23,7 +23,7 @@ class SMSService {
     sendSMSNotification = async (smsData) => {
         try {
 
-            await fetch(`http://localhost:3002/api/v1/sms/send`, {
+            await fetch(`http://localhost:${process.env.SMS_SERVICE_PORT}/api/v1/sms/send`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -94,7 +94,7 @@ class SMSService {
 
             this.isProcessing = false;
 
-            console.log('Events processed:', eventsToProcess);
+            console.log('SMS Events processed:', eventsToProcess);
 
         } catch (error) {
             console.log('Failed to process sms queue', error);

@@ -4,7 +4,7 @@ const NotiService = new NotificationService();
 
 class NotificationController {
     constructor(parameters) { }
-
+    
     static handleEmailNotification = async (req, res) => {
         try {
             const { subject, body } = req.body;

@@ -10,8 +10,8 @@ app.config = config;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/api/v1/notify', notificationRouter);
 
-// app.set('name', 'kunal')
+// initializing the notification router
+app.use('/api/v1/notify', notificationRouter);
 
 export default app;
