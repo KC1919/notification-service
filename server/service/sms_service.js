@@ -63,7 +63,7 @@ class SMSService {
             }
         } catch (error) {
             // console.log('Failed to check sms service health', error);
-            console.log('sms Service is down!!');
+            console.log('SMS Service is down!!');
             return false;
         }
     }
