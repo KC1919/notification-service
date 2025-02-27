@@ -93,7 +93,6 @@ class SMSService {
             if (this.isSMSServiceHealthy) {
 
                 const smsQueueCopy = [...this.smsQueue];
-                this.smsQueue = [];
 
                 smsQueueCopy.reverse();
 
