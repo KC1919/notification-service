@@ -101,41 +101,44 @@ class EmailService {
 
                 const eventsToProcess = emailQueueCopy.length;
 
-                this.isProcessing = true;
+                if(this.isProcessing===false){
 
-                while (emailQueueCopy.length > 0 && this.isEmailServiceHealthy) {
-                    const data = emailQueueCopy[emailQueueCopy.length - 1];
-                    const result = await this.sendEmailNotification(data);
-                    if (result === false) break;
-
-                    emailQueueCopy.pop();
-                    console.log("Popped");
-                }
-
-                if (this.isEmailServiceHealthy === false) {
-                    this.isProcessing = false;
-                }
-
-                if (emailQueueCopy.length < eventsToProcess || emailQueueCopy.length == 0) {
-                    this.isProcessing = false;
-
-                    this.emailQueue.reverse();
-
-                    let counter = eventsToProcess - emailQueueCopy.length;
-                    let copyCounter = counter;
-                    console.log("IN there to clean");
-
-
-                    while (counter > 0) {
-                        console.log("Popped from original queue");
-
-                        this.emailQueue.pop();
-                        counter--;
+                    this.isProcessing = true;
+    
+                    while (emailQueueCopy.length > 0 && this.isEmailServiceHealthy) {
+                        const data = emailQueueCopy[emailQueueCopy.length - 1];
+                        const result = await this.sendEmailNotification(data);
+                        if (result === false) break;
+    
+                        emailQueueCopy.pop();
+                        console.log("Popped");
                     }
-
-                    this.emailQueue.reverse();
-
-                    console.log('Email Events processed:', copyCounter);
+    
+                    if (this.isEmailServiceHealthy === false) {
+                        this.isProcessing = false;
+                    }
+    
+                    if (emailQueueCopy.length < eventsToProcess || emailQueueCopy.length == 0) {
+                        this.isProcessing = false;
+    
+                        this.emailQueue.reverse();
+    
+                        let counter = eventsToProcess - emailQueueCopy.length;
+                        let copyCounter = counter;
+                        console.log("IN there to clean");
+    
+    
+                        while (counter > 0) {
+                            console.log("Popped from original queue");
+    
+                            this.emailQueue.pop();
+                            counter--;
+                        }
+    
+                        this.emailQueue.reverse();
+    
+                        console.log('Email Events processed:', copyCounter);
+                    }
                 }
             }
 
