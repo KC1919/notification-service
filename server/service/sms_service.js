@@ -1,3 +1,5 @@
+import CustomError from '../utils/custom_error.js';
+
 class SMSService {
 
     constructor() {
@@ -9,16 +11,32 @@ class SMSService {
 
     handleSMSEvent = async ({ message, mobile }) => {
         try {
-            this.smsQueue.push({
+
+            const smsObject = {
                 content: {
                     'message': message,
                     'mobile': mobile
                 }
-            });
+            }
 
-            console.log('Messages in SMS Queue:', this.smsQueue.length);
+            const result = await this.sendSMSNotification(smsObject);
+
+            if (result.status === true) {
+                return result.response;
+            }
+            else {
+                this.smsQueue.push({
+                    content: {
+                        'message': message,
+                        'mobile': mobile
+                    }
+                });
+                console.log('SMS Service is down, added sms-request in sms queue, total requests in SMS Queue:', this.smsQueue.length);
+                throw new CustomError('SMS Service is down, added sms-request in SMS queue', 500)
+            }
         } catch (error) {
             console.log('Error while handling sms event:', error);
+            throw new CustomError('Error while handling sms event\n' + error.message, 500);
         }
     }
 
@@ -36,10 +54,11 @@ class SMSService {
             });
 
             if (response.status === 200) {
-                return true;
+                const jsonResp = await response.json();
+                return { response: jsonResp, status: true };
             }
             else {
-                return false;
+                return { response: jsonResp, status: false };
             }
         } catch (error) {
             console.log('Failed to handle sms notification.');
@@ -86,6 +105,7 @@ class SMSService {
             }
         } catch (error) {
             console.log('Failed to check sms queue', error);
+            throw new CustomError('Failed to check sms queue\n' + error.message, 500);
         }
     }
 
@@ -152,14 +172,18 @@ class SMSService {
 
     startProcessing = async () => {
         try {
-            // check every 30 secs, if the service is healthy and if the queue has any requests to be processed
             setInterval(async () => {
-                const result = await this.checkSMSServiceHealth();
-                this.isSMSServiceHealthy = result;
-                await this.checkSMSQueue();
+                try {
+                    const result = await this.checkSMSServiceHealth();
+                    this.isSMSServiceHealthy = result;
+                    await this.checkSMSQueue();
+                } catch (error) {
+                    throw new CustomError(error.message, 500);
+                }
             }, 0.5 * 60 * 1000);
         } catch (error) {
             console.log('Failed to start processing the sms queue');
+            throw new CustomError(error.message, 500);
         }
     }
 }

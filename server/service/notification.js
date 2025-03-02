@@ -1,3 +1,4 @@
+import CustomError from '../utils/custom_error.js';
 import EmailService from './email_service.js';
 import SMSService from './sms_service.js';
 
@@ -8,22 +9,22 @@ class NotificationService {
     constructor(parameters) {
     }
 
-    handleEmailNotification = async ({ subject, body }) => {
+    handleEmailNotification = async ({ email, subject, body }) => {
         try {
-            const response = await Email.handleEmailEvent({ subject, body });
-            return;
+            const response = await Email.handleEmailEvent({ email, subject, body });
+            return response;
         } catch (error) {
-            throw new Error('Failed to handle email notification.')
+            throw new CustomError(error.message, 500)
         }
     }
 
     handleSmsNotification = async ({ message, mobile }) => {
         try {
-            const response = await SMS.handleSMSEvent({message, mobile});
+            const response = await SMS.handleSMSEvent({ message, mobile });
             return;
         } catch (error) {
             console.log(error);
-            throw new Error('Failed to handle sms notification.')
+            throw new CustomError('Failed to handle sms notification.\n' + error.message, 500)
         }
     }
 }
