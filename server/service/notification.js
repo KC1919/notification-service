@@ -21,7 +21,7 @@ class NotificationService {
     handleSmsNotification = async ({ message, mobile }) => {
         try {
             const response = await SMS.handleSMSEvent({ message, mobile });
-            return;
+            return response;;
         } catch (error) {
             console.log(error);
             throw new CustomError('Failed to handle sms notification.\n' + error.message, 500)

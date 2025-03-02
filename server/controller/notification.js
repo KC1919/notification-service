@@ -9,7 +9,8 @@ class NotificationController {
     static handleEmailNotification = async (req, res, next) => {
         try {
             const { email, subject, body } = req.body;
-            const response = await NotiService.handleEmailNotification(email, subject, body);
+
+            const response = await NotiService.handleEmailNotification({ email, subject, body });
             successResponse(res, 200, 'Email notification sent successfully!', response);
         } catch (error) {
             console.log("Failed to handle email notification", error);
@@ -17,13 +18,14 @@ class NotificationController {
         }
     }
 
-    static handleSmsNotification = async (req, res) => {
+    static handleSmsNotification = async (req, res, next) => {
         try {
             const { message, mobile } = req.body;
             const response = await NotiService.handleSmsNotification({ message, mobile });
             successResponse(res, 200, 'SMS notification sent successfully!', response);
         } catch (error) {
             console.log("Failed to handle sms notification", error);
+            next(error);
         }
     }
 }

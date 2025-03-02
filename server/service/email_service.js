@@ -11,7 +11,7 @@ class EmailService {
 
     handleEmailEvent = async ({ email, subject, body }) => {
         try {
-
+            
             // form email object 
             const emailObject = {
                 content: {
